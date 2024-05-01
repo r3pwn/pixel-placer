@@ -51,7 +51,7 @@ export default function Canvas({ readonly }: Props) {
     }
 
     fetch("/api/canvas", {
-      method: "PUT",
+      method: "POST",
       body: JSON.stringify({
         ...pixel,
         color: currentColor,

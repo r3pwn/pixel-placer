@@ -26,7 +26,7 @@ export async function GET() {
   return NextResponse.json(pixels, { status: 200 });
 }
 
-export async function PUT(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const session = auth.getSession();
   const isSignedIn = await session.isSignedIn();
 
