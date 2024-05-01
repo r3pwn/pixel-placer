@@ -13,6 +13,7 @@ type Props = {
 };
 
 type CanvasPixel = {
+  id?: string;
   x: number;
   y: number;
   color: string;
@@ -34,10 +35,11 @@ export default function Canvas({ readonly }: Props) {
     fetch("/api/canvas").then(async (res) => {
       for (let pixel of await res.json()) {
         canvasPixels[pixel.y * PIXELS_PER_ROW + pixel.x] = {
+          id: pixel.id,
           x: pixel.x,
           y: pixel.y,
           color: pixel.color,
-        };
+        } as CanvasPixel;
       }
       setPixels(canvasPixels);
     });
@@ -51,15 +53,17 @@ export default function Canvas({ readonly }: Props) {
     fetch("/api/canvas", {
       method: "PUT",
       body: JSON.stringify({
-        x: pixel.x,
-        y: pixel.y,
+        ...pixel,
         color: currentColor,
       }),
-    }).then(() => {
+    }).then(async (result) => {
+      let res = await result.json();
+
       setPixels(
         pixels.map((value) => {
           if (value.x === pixel.x && value.y === pixel.y) {
             return {
+              id: res.id,
               x: pixel.x,
               y: pixel.y,
               color: currentColor,

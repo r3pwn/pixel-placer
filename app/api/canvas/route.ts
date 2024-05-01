@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, client } from "@/providers/edgedb";
-import e from "@/dbschema/edgeql-js";
 import { PIXELS_PER_ROW } from "@/constants";
+import e from "@/dbschema/edgeql-js";
 
 const PIXEL_COORD_MIN = 0;
 const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
@@ -9,6 +9,7 @@ const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
 export async function GET() {
   const pixels = await e
     .select(e.CanvasPixel, () => ({
+      id: true,
       x: true,
       y: true,
       color: true,
@@ -33,7 +34,7 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: "Not logged in" }, { status: 403 });
   }
 
-  let reqJson;
+  let reqJson = undefined;
   try {
     reqJson = await req.json();
   } catch {
@@ -62,8 +63,24 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ message: "Bad request" }, { status: 400 });
   }
 
+  if (reqJson.id) {
+    const updateResult = await e
+      .update(e.CanvasPixel, (pixel) => ({
+        filter_single: e.op(pixel.id, "=", e.uuid(reqJson.id)),
+        set: {
+          color: reqJson.color,
+        },
+      }))
+      .run(client);
+
+    return NextResponse.json(updateResult, {
+      status: 200,
+    });
+  }
+
+  let result;
   try {
-    await e
+    result = await e
       .insert(e.CanvasPixel, {
         x: Number(reqJson.x),
         y: Number(reqJson.y),
@@ -83,12 +100,7 @@ export async function PUT(req: NextRequest) {
     }
   }
 
-  return NextResponse.json(
-    {
-      message: "ok",
-    },
-    {
-      status: 200,
-    }
-  );
+  return NextResponse.json(result, {
+    status: 200,
+  });
 }
