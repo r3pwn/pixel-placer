@@ -18,11 +18,11 @@ module default {
   type CanvasPixel {
     required x: int16 {
       constraint min_value(0);
-      constraint max_value(9);
+      constraint max_value(999);
     }
     required y: int16 {
       constraint min_value(0);
-      constraint max_value(9);
+      constraint max_value(999);
     }
     required coord_pair := to_str(.x) ++ ',' ++ to_str(.y);
     required color: Color {

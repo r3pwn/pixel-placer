@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import { PIXELS_PER_ROW } from "@/constants";
 import Pixel from "./Pixel";
 
-const NUM_ROWS = 10;
-const PIXELS_PER_ROW = 10;
+// assuming a square canvas
+const NUM_ROWS = PIXELS_PER_ROW;
+
 const COLOR_OPTIONS = ["#eb4034", "#8709db", "#eff702", "#ffffff", "#000000"];
 
 type Props = {
@@ -95,8 +97,8 @@ export default function Canvas({ readonly }: Props) {
         className="canvas"
         style={{
           display: "inline-grid",
-          gridTemplateColumns: "repeat(10, 1fr)",
-          gridTemplateRows: "repeat(10, 1fr)",
+          gridTemplateColumns: `repeat(${PIXELS_PER_ROW}, 1fr)`,
+          gridTemplateRows: `repeat(${NUM_ROWS}, 1fr)`,
         }}
       >
         {pixels.map((pixel, index) => (

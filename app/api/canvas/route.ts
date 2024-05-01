@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, client } from "@/providers/edgedb";
 import e from "@/dbschema/edgeql-js";
+import { PIXELS_PER_ROW } from "@/constants";
 
 const PIXEL_COORD_MIN = 0;
-const PIXEL_COORD_MAX = 9;
+const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
 
 export async function GET() {
   const pixels = await e
