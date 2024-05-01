@@ -15,7 +15,6 @@ export const { GET, POST } = auth.createAuthRouteHandlers({
           ),
         })
         .run(client);
-      redirect("/onboarding");
     }
     redirect("/");
   },
