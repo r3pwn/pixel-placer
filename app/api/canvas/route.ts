@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "edgedb";
+import { auth, client } from "@/providers/edgedb";
 import e from "@/dbschema/edgeql-js";
 
 const PIXEL_COORD_MIN = 0;
 const PIXEL_COORD_MAX = 9;
 
 export async function GET() {
-  const client = createClient();
-
   const pixels = await e
     .select(e.CanvasPixel, () => ({
       x: true,
@@ -27,6 +25,13 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const session = auth.getSession();
+  const isSignedIn = await session.isSignedIn();
+
+  if (!isSignedIn) {
+    return NextResponse.json({ message: "Not logged in" }, { status: 403 });
+  }
+
   let reqJson;
   try {
     reqJson = await req.json();
@@ -55,8 +60,6 @@ export async function PUT(req: NextRequest) {
   if (!validRequest) {
     return NextResponse.json({ message: "Bad request" }, { status: 400 });
   }
-
-  const client = createClient();
 
   try {
     await e

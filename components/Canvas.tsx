@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Pixel from "./Pixel";
 
 const NUM_ROWS = 10;
 const PIXELS_PER_ROW = 10;
+
+type Props = {
+  readonly?: boolean;
+};
 
 type CanvasPixel = {
   x: number;
@@ -11,7 +15,7 @@ type CanvasPixel = {
   color: string;
 };
 
-export default function Canvas() {
+export default function Canvas({ readonly }: Props) {
   const [pixels, setPixels] = useState([] as CanvasPixel[]);
   const [currentColor, setCurrentColor] = useState("#eb4034");
 
@@ -37,6 +41,10 @@ export default function Canvas() {
   }, []);
 
   const handleClick = (pixel: CanvasPixel) => {
+    if (readonly) {
+      return;
+    }
+
     fetch("/api/canvas", {
       method: "PUT",
       body: JSON.stringify({

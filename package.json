@@ -10,6 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@edgedb/auth-nextjs": "^0.2.0",
     "edgedb": "^1.5.4",
     "next": "14.2.3",
     "react": "^18",
