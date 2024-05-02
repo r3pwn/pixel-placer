@@ -111,26 +111,6 @@ export default function Canvas({ readonly }: Props) {
       {!readonly && (
           <Sidebar color={currentColor} setColor={setCurrentColor} lastFiveColors={lastFiveColors} />
       )}
-      {/* {!readonly && (
-        <div className="color-options">
-          {COLOR_OPTIONS.map((color) => (
-            <input
-              key={color}
-              name="color_option"
-              value={color}
-              checked={color === currentColor}
-              type="radio"
-              style={{
-                width: 20,
-                height: 20,
-                accentColor: color,
-                borderRadius: "100%",
-              }}
-              onChange={(e) => setCurrentColor(e.target.value)}
-            />
-          ))}
-        </div>
-      )} */}
       <ul
         className="canvas"
         style={{
