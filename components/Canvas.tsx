@@ -3,7 +3,7 @@ import { useState } from "react";
 import { PIXELS_PER_ROW } from "@/constants";
 import Pixel from "./Pixel";
 import { CanvasPixel } from "@/types/CanvasPixel";
-import { useGetCanvas } from "@/app/hooks/useGetCanvas";
+import { useGetCanvas } from "@/hooks/useGetCanvas";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
