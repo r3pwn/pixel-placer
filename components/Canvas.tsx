@@ -4,18 +4,16 @@ import { PIXELS_PER_ROW } from "@/constants";
 import Pixel from "./Pixel";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { useGetCanvas } from "@/hooks/useGetCanvas";
+import Sidebar from "./Sidebar";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
 
-const COLOR_OPTIONS = ["#eb4034", "#8709db", "#eff702", "#ffffff", "#000000"];
 let apiBuffer: NodeJS.Timeout;
 
 type Props = {
   readonly?: boolean;
 };
-
-
 
 const setCanvasPixels = (setPixels: (x: CanvasPixel[]) => void, pixel: CanvasPixel, pixels: CanvasPixel[], currentColor: string): void => {
   // Locally set the pixels first
@@ -60,9 +58,26 @@ const setCanvasPixels = (setPixels: (x: CanvasPixel[]) => void, pixel: CanvasPix
   } , 1000)
 }
 
+const setColorHistory = (currentColor: string, lastFiveColors: string[], setLastFiveColors: (e:string[]) => void) => {
+  console.log(lastFiveColors.includes(currentColor));
+  if (lastFiveColors.includes(currentColor)) {
+    // Check the position of the color
+    const index = lastFiveColors.indexOf(currentColor);
+    if (index === 0) {
+      return;
+    }
+    const updatedColorHistory = lastFiveColors.filter(color => color != currentColor);
+    updatedColorHistory.unshift(currentColor);
+    setLastFiveColors(updatedColorHistory)
+    return;
+  }
+  setLastFiveColors([currentColor, ...lastFiveColors.slice(0,4)])
+}
+
 export default function Canvas({ readonly }: Props) {
   const [pixels, setPixels] = useState([] as CanvasPixel[]);
-  const [currentColor, setCurrentColor] = useState(COLOR_OPTIONS[0]);
+  const [currentColor, setCurrentColor] = useState("#eb4034");
+  const [lastFiveColors, setLastFiveColors] = useState(["#eb4034"]);
 
   useGetCanvas(setPixels);
   const handleDrag = (event: any, pixel: CanvasPixel) => {
@@ -77,6 +92,7 @@ export default function Canvas({ readonly }: Props) {
       return;
     }
     setCanvasPixels(setPixels, pixel, pixels, currentColor)
+    setColorHistory(currentColor, lastFiveColors, setLastFiveColors)
   }
 
   const handleClick = (pixel: CanvasPixel) => {
@@ -87,11 +103,15 @@ export default function Canvas({ readonly }: Props) {
       return;
     }
     setCanvasPixels(setPixels, pixel, pixels, currentColor)
+    setColorHistory(currentColor, lastFiveColors, setLastFiveColors)
   };
 
   return (
-    <>
+    <div className="flex">
       {!readonly && (
+          <Sidebar color={currentColor} setColor={setCurrentColor} lastFiveColors={lastFiveColors} />
+      )}
+      {/* {!readonly && (
         <div className="color-options">
           {COLOR_OPTIONS.map((color) => (
             <input
@@ -110,7 +130,7 @@ export default function Canvas({ readonly }: Props) {
             />
           ))}
         </div>
-      )}
+      )} */}
       <ul
         className="canvas"
         style={{
@@ -133,6 +153,6 @@ export default function Canvas({ readonly }: Props) {
           </li>
         ))}
       </ul>
-    </>
+    </div>
   );
 }
