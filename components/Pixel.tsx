@@ -5,6 +5,7 @@ type Props = {
   selected?: boolean;
   size?: number;
   onClick?: () => void;
+  onDrag?: (e: any) => void;
 };
 
 const defaultProps: Partial<Props> = {
@@ -12,7 +13,7 @@ const defaultProps: Partial<Props> = {
   size: 25,
 };
 
-export default function Pixel({ color, size, onClick }: Props) {
+export default function Pixel({ color, size, onClick, onDrag }: Props) {
   return (
     <div
       className="canvas-pixel"
@@ -22,6 +23,7 @@ export default function Pixel({ color, size, onClick }: Props) {
         height: size || defaultProps.size,
       }}
       onClick={onClick}
+      onMouseEnter={onDrag}
     ></div>
   );
 }
