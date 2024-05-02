@@ -113,7 +113,6 @@ export default function Canvas({ readonly }: Props) {
     if (currentColor === pixel.color) {
       return;
     }
-    console.log(pixel)
     setCanvasPixels(setPixels, pixel, pixels, currentColor)
   };
 
