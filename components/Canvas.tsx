@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { PIXELS_PER_ROW } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { useCanvasStore } from "@/stores/canvas";
-import { getCanvas, putCanvasPixel } from "@/providers/canvas";
+import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
 import { useColorStore } from "@/stores/color";
 import Sidebar from "./Sidebar";
 import Pixel from "./Pixel";
@@ -22,7 +22,7 @@ export default function Canvas({ readonly }: Props) {
   useEffect(() => {
     flushCanvas();
 
-    getCanvas().then(drawToCanvas);
+    getCanvasPixels().then(drawToCanvas);
   }, [drawToCanvas, flushCanvas]);
 
   /*

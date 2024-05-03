@@ -4,7 +4,7 @@ type PixelUpdateResponse = {
   id: string;
 };
 
-export const getCanvas = async () => {
+export const getCanvasPixels = async () => {
   const result = await fetch("/api/canvas");
   return (await result.json()) as CanvasPixel[];
 };
