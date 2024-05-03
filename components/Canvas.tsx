@@ -5,7 +5,6 @@ import { CanvasPixel } from "@/types/CanvasPixel";
 import { useCanvasStore } from "@/stores/canvas";
 import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
 import { useColorStore } from "@/stores/color";
-import Sidebar from "./Sidebar";
 import Pixel from "./Pixel";
 
 // assuming a square canvas
@@ -42,7 +41,7 @@ export default function Canvas({ readonly }: Props) {
     });
   };
 
-  const handleClick = (pixel: CanvasPixel) => {
+  const handlePixelSubmit = (pixel: CanvasPixel) => {
     if (readonly) {
       return;
     }
@@ -55,7 +54,6 @@ export default function Canvas({ readonly }: Props) {
 
   return (
     <div className="flex">
-      {!readonly && <Sidebar />}
       <ul
         className="canvas"
         style={{
@@ -68,8 +66,8 @@ export default function Canvas({ readonly }: Props) {
           <li key={index}>
             <Pixel
               color={pixel.color}
-              onClick={() => {
-                handleClick(pixel);
+              onSubmit={() => {
+                handlePixelSubmit(pixel);
               }}
             />
           </li>

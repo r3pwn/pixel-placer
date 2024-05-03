@@ -11,8 +11,13 @@
   },
   "dependencies": {
     "@edgedb/auth-nextjs": "^0.2.0",
+    "@headlessui-float/react": "^0.13.3",
     "@headlessui/react": "^1.7.19",
+    "@headlessui/tailwindcss": "^0.2.0",
+    "@types/color": "^3.0.6",
+    "color": "^4.2.3",
     "edgedb": "^1.5.4",
+    "install": "^0.13.0",
     "next": "14.2.3",
     "react": "^18",
     "react-colorful": "^5.6.1",
