@@ -1,13 +1,18 @@
 import { useColorStore } from "@/stores/color";
+import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
-export default function Sidebar() {
+export default function ColorPicker({currentPixelColor}: {currentPixelColor: string}) {
   const { currentColor, setCurrentColor, pastColors } = useColorStore();
+  const [ selectedColor, setSelectedColor] = useState(currentPixelColor);
   return (
-    <aside className="flex flex-col mr-3">
-      <div>Current Color: {currentColor}</div>
-      <div>
-        <HexColorPicker color={currentColor} onChange={setCurrentColor} />
+    <div className="flex flex-col mx-3">
+      <div className="text-sm">
+        <div>Current Pixel Color: {currentPixelColor}</div>
+        <div>New Color: {selectedColor}</div>
+      </div>
+      <div className="mt-3">
+        <HexColorPicker color={selectedColor} onChange={setSelectedColor} />
       </div>
       <ul className="flex mt-3 gap-2">
         {pastColors.length &&
@@ -31,6 +36,6 @@ export default function Sidebar() {
             );
           })}
       </ul>
-    </aside>
+    </div>
   );
 }
