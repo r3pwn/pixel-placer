@@ -66,6 +66,7 @@ export default function Canvas({ readonly }: Props) {
           <li key={index}>
             <Pixel
               color={pixel.color}
+              readonly={readonly}
               onSubmit={() => {
                 handlePixelSubmit(pixel);
               }}
