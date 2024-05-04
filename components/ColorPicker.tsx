@@ -1,10 +1,22 @@
 import { useColorStore } from "@/stores/color";
+import { debounce } from "lodash";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
+const debounceSetCurrentColor = debounce((color: string, setCurrentColor: (color: string) => void) => {
+  console.log("called!", color)
+  setCurrentColor(color); 
+}, 500)
+
 export default function ColorPicker({currentPixelColor}: {currentPixelColor: string}) {
   const { currentColor, setCurrentColor, pastColors } = useColorStore();
-  const [ selectedColor, setSelectedColor] = useState(currentPixelColor);
+  const [ selectedColor, setSelectedColor ] = useState(currentPixelColor);
+
+  const handleChange = (color: string) => {
+    setSelectedColor(color);
+    debounceSetCurrentColor(color, setCurrentColor);
+  }
+
   return (
     <div className="flex flex-col mx-3">
       <div className="text-sm">
@@ -12,7 +24,7 @@ export default function ColorPicker({currentPixelColor}: {currentPixelColor: str
         <div>New Color: {selectedColor}</div>
       </div>
       <div className="mt-3">
-        <HexColorPicker color={selectedColor} onChange={setSelectedColor} />
+        <HexColorPicker color={currentPixelColor} onChange={handleChange} />
       </div>
       <ul className="flex mt-3 gap-2">
         {pastColors.length &&
