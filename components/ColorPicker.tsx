@@ -4,7 +4,6 @@ import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
 const debounceSetCurrentColor = debounce((color: string, setCurrentColor: (color: string) => void) => {
-  console.log("called!", color)
   setCurrentColor(color); 
 }, 500)
 
