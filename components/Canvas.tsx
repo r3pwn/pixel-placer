@@ -5,6 +5,8 @@ import { CanvasPixel } from "@/types/CanvasPixel";
 import { useCanvasStore } from "@/stores/canvas";
 import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
 import { useColorStore } from "@/stores/color";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { CanvasControls } from "./CanvasControls";
 import Pixel from "./Pixel";
 
 // assuming a square canvas
@@ -53,27 +55,36 @@ export default function Canvas({ readonly }: Props) {
   };
 
   return (
-    <div className="flex">
-      <ul
-        className="canvas"
-        style={{
-          display: "inline-grid",
-          gridTemplateColumns: `repeat(${PIXELS_PER_ROW}, 1fr)`,
-          gridTemplateRows: `repeat(${NUM_ROWS}, 1fr)`,
-        }}
-      >
-        {pixels.map((pixel, index) => (
-          <li key={index}>
-            <Pixel
-              color={pixel.color}
-              readonly={readonly}
-              onSubmit={() => {
-                handlePixelSubmit(pixel);
+    <TransformWrapper>
+      {(utils) => (
+        <div>
+          <CanvasControls {...utils} />
+          <TransformComponent
+            wrapperStyle={{ width: "100vw", height: "100vh" }}
+          >
+            <ul
+              className="canvas"
+              style={{
+                display: "inline-grid",
+                gridTemplateColumns: `repeat(${PIXELS_PER_ROW}, 1fr)`,
+                gridTemplateRows: `repeat(${NUM_ROWS}, 1fr)`,
               }}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
+            >
+              {pixels.map((pixel, index) => (
+                <li key={index}>
+                  <Pixel
+                    color={pixel.color}
+                    readonly={readonly}
+                    onSubmit={() => {
+                      handlePixelSubmit(pixel);
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          </TransformComponent>
+        </div>
+      )}
+    </TransformWrapper>
   );
 }
