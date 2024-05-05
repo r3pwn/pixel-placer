@@ -4,11 +4,7 @@ import { PIXELS_PER_ROW, CANVAS_PX_SCALE } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
 import { useColorStore } from "@/stores/color";
-import {
-  TransformWrapper,
-  TransformComponent,
-  MiniMap,
-} from "react-zoom-pan-pinch";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { CanvasControls } from "./CanvasControls";
 import { useCanvas } from "@/hooks/useCanvas";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -109,22 +105,6 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
       {(utils) => (
         <div>
           <CanvasControls {...utils} />
-          <div
-            style={{
-              position: "fixed",
-              zIndex: 5,
-              top: "50px",
-              right: "50px",
-            }}
-          >
-            <MiniMap>
-              <canvas
-                ref={mirrorRef}
-                width={CANVAS_WIDTH}
-                height={CANVAS_HEIGHT}
-              />
-            </MiniMap>
-          </div>
           <TransformComponent
             wrapperStyle={{
               width: "100vw",
