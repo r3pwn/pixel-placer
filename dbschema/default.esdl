@@ -24,11 +24,10 @@ module default {
       constraint min_value(0);
       constraint max_value(999);
     }
-    required coord_pair := to_str(.x) ++ ',' ++ to_str(.y);
     required color: Color {
       default := "#ffffff"
     }
 
-    constraint exclusive on (.coord_pair);
+    constraint exclusive on ((.x, .y));
   }
 }
