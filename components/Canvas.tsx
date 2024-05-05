@@ -13,6 +13,7 @@ import { Button } from "./ui/button";
 import { MdOutlineEdit } from "react-icons/md";
 import Link from "next/link";
 import Color from "color";
+import ColorPickerDialog from "./ColorPickerDialog";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -29,7 +30,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   const [activePixel, setActivePixel] = useState(
     undefined as CanvasPixel | undefined
   );
-  const { currentColor, addPastColor } = useColorStore();
+  const { addPastColor } = useColorStore();
   const { canvasRef, canvasContext, drawToCanvas } = useCanvas(
     CANVAS_WIDTH,
     CANVAS_HEIGHT,
@@ -47,16 +48,6 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     if (!canvasContext) {
       return;
     }
-
-    /*
-     * sets a pixel locally, then updates the store with
-     * the ID after the API call completes
-     */
-    const eagerDraw = (pixel: CanvasPixel) => {
-      const newPixel = { ...pixel, color: currentColor };
-      drawToCanvas([newPixel]);
-      putCanvasPixel(newPixel);
-    };
 
     const canvas = canvasRef.current;
 
@@ -86,7 +77,15 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     return () => {
       canvas?.removeEventListener("click", clickHandler);
     };
-  }, [canvasContext, canvasRef, currentColor, activePixel]);
+  }, [canvasContext, canvasRef, activePixel]);
+
+  // sets a pixel locally, then makes the API call
+  const eagerDraw = (pixel: CanvasPixel) => {
+    drawToCanvas([pixel]);
+    addPastColor(pixel.color);
+    putCanvasPixel(pixel);
+    setActivePixel(pixel);
+  };
 
   const activeOutline = useMemo(() => {
     const colorObject = Color(activePixel?.color);
@@ -162,15 +161,20 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
                   </Link>
                 )}
                 {isLoggedIn && (
-                  <Button
-                    size="icon"
-                    type="button"
-                    onClick={() =>
-                      console.log("not yet implemented. coming soon")
+                  <ColorPickerDialog
+                    initialColor={activePixel.color}
+                    trigger={
+                      <Button size="icon" type="button">
+                        <MdOutlineEdit />
+                      </Button>
                     }
-                  >
-                    <MdOutlineEdit />
-                  </Button>
+                    onSubmit={(color) =>
+                      eagerDraw({
+                        ...activePixel,
+                        color,
+                      })
+                    }
+                  />
                 )}
               </CardContent>
             </Card>
