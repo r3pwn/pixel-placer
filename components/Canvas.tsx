@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { PIXELS_PER_ROW, CANVAS_PX_SCALE } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
@@ -11,9 +11,11 @@ import {
 } from "react-zoom-pan-pinch";
 import { CanvasControls } from "./CanvasControls";
 import { useCanvas } from "@/hooks/useCanvas";
-import { Popover } from "@headlessui/react";
-import { Float } from "@headlessui-float/react";
-import Pixel from "./Pixel";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { rgbToHex } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { MdOutlineEdit } from "react-icons/md";
+import Link from "next/link";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -22,11 +24,12 @@ const CANVAS_WIDTH = PIXELS_PER_ROW * CANVAS_PX_SCALE;
 const CANVAS_HEIGHT = NUM_ROWS * CANVAS_PX_SCALE;
 
 type Props = {
-  readonly?: boolean;
+  isLoggedIn: boolean;
+  authUrl: string;
 };
 
-export default function Canvas({ readonly }: Props) {
-  const [hoverPixel, setHoverPixel] = useState(
+export default function Canvas({ isLoggedIn, authUrl }: Props) {
+  const [activePixel, setActivePixel] = useState(
     undefined as CanvasPixel | undefined
   );
   const { currentColor, addPastColor } = useColorStore();
@@ -61,25 +64,34 @@ export default function Canvas({ readonly }: Props) {
     const canvas = canvasRef.current;
 
     const clickHandler = (e: MouseEvent) => {
-      if (readonly) {
-        return;
-      }
-
       const clickedX = Math.floor(e.offsetX / CANVAS_PX_SCALE);
       const clickedY = Math.floor(e.offsetY / CANVAS_PX_SCALE);
 
-      eagerDraw({ x: clickedX, y: clickedY, color: currentColor });
-      addPastColor(currentColor);
+      const midpointX = clickedX * CANVAS_PX_SCALE + 0.5 * CANVAS_PX_SCALE;
+      const midpointY = clickedY * CANVAS_PX_SCALE + 0.5 * CANVAS_PX_SCALE;
+
+      const pixelData = canvasContext.getImageData(
+        midpointX,
+        midpointY,
+        1,
+        1
+      ).data;
+
+      setActivePixel({
+        x: clickedX,
+        y: clickedY,
+        color: rgbToHex(pixelData[0], pixelData[1], pixelData[2]),
+      });
     };
 
     const hoverHandler = (e: MouseEvent) => {
       const hoverX = Math.floor(e.offsetX / CANVAS_PX_SCALE);
       const hoverY = Math.floor(e.offsetY / CANVAS_PX_SCALE);
 
-      if (hoverPixel?.x === hoverX && hoverPixel?.y === hoverY) {
+      if (activePixel?.x === hoverX && activePixel?.y === hoverY) {
         return;
       }
-      setHoverPixel({ x: hoverX, y: hoverY, color: "#ffffff" });
+      // setActivePixel({ x: hoverX, y: hoverY, color: "#ffffff" });
     };
 
     canvas?.addEventListener("click", clickHandler);
@@ -89,10 +101,10 @@ export default function Canvas({ readonly }: Props) {
       canvas?.removeEventListener("click", clickHandler);
       canvas?.removeEventListener("mousemove", hoverHandler);
     };
-  }, [readonly, canvasContext, canvasRef, currentColor, hoverPixel]);
+  }, [canvasContext, canvasRef, currentColor, activePixel]);
 
   return (
-    <TransformWrapper>
+    <TransformWrapper initialScale={4}>
       {(utils) => (
         <div>
           <CanvasControls {...utils} />
@@ -113,49 +125,76 @@ export default function Canvas({ readonly }: Props) {
             </MiniMap>
           </div>
           <TransformComponent
-            wrapperStyle={{ width: "100vw", height: "100vh" }}
+            wrapperStyle={{
+              width: "100vw",
+              height: "100vh",
+            }}
           >
-            <Popover
-              className="relative"
-              style={{
-                ...(!!hoverPixel && {
-                  top: hoverPixel.y * CANVAS_PX_SCALE,
-                  left: hoverPixel.x * CANVAS_PX_SCALE,
-                }),
-              }}
-            >
-              <Float
-                autoPlacement={{
-                  alignment: "start",
+            {activePixel && (
+              <div
+                className={`canvas-pixel absolute outline outline-1 shadow-lg outline-offset-[-1px]`}
+                style={{
+                  backgroundColor: "transparent",
+                  width: CANVAS_PX_SCALE,
+                  height: CANVAS_PX_SCALE,
+                  // outlineColor: darkenedColor.toString(),
+                  outlineColor: "red",
+                  top: activePixel.y * CANVAS_PX_SCALE,
+                  left: activePixel.x * CANVAS_PX_SCALE,
                 }}
-              >
-                <Popover.Button
-                  as="div"
-                  className={`canvas-pixel hover:scale-110 hover:outline-1 hover:outline hover:relative hover:z-10 hover:shadow-lg outline-offset-[-1px] ui-open:scale-110 ui-open:outline-1 ui-open:outline ui-open:relative ui-open:z-10 ui-open:shadow-lg`}
-                  style={{
-                    position: "absolute",
-                    width: CANVAS_PX_SCALE,
-                    height: CANVAS_PX_SCALE,
-                    backgroundColor: "transparent",
-                    outlineColor: "#ffffff",
-                    zIndex: 10,
-                  }}
-                />
-                <Popover.Panel
-                  className={
-                    "absolute z-10 bg-zinc-800 p-2 rounded-md shadow-md flex flex-col"
-                  }
-                >
-                  <h2>panel</h2>
-                </Popover.Panel>
-              </Float>
-            </Popover>
+              />
+            )}
             <canvas
               ref={canvasRef}
               width={CANVAS_WIDTH}
               height={CANVAS_HEIGHT}
             />
           </TransformComponent>
+          {activePixel && (
+            <Card
+              style={{
+                position: "fixed",
+                zIndex: 5,
+                bottom: "1rem",
+                left: "1rem",
+              }}
+            >
+              <CardHeader>
+                <CardTitle>
+                  ({activePixel.x}, {activePixel.y})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex gap-3 items-center">
+                <div
+                  style={{
+                    backgroundColor: activePixel.color,
+                    height: "2rem",
+                    width: "2rem",
+                    borderRadius: "50%",
+                    border: "2px solid white",
+                    outline: "2px solid black",
+                    outlineOffset: "1px",
+                  }}
+                ></div>
+                {!isLoggedIn && (
+                  <Link href={authUrl}>
+                    <Button>Log in to update</Button>
+                  </Link>
+                )}
+                {isLoggedIn && (
+                  <Button
+                    size="icon"
+                    type="button"
+                    onClick={() =>
+                      console.log("not yet implemented. coming soon")
+                    }
+                  >
+                    <MdOutlineEdit />
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </TransformWrapper>

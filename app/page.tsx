@@ -8,12 +8,7 @@ export default async function Home() {
 
   return (
     <div>
-      {/*!isSignedIn && (
-        <Link href={auth.getBuiltinUIUrl()} className="text-blue-500">
-          Sign in
-        </Link>
-      )*/}
-      <Canvas readonly={!isSignedIn} />
+      <Canvas isLoggedIn={isSignedIn} authUrl={auth.getBuiltinUIUrl()} />
     </div>
   );
 }

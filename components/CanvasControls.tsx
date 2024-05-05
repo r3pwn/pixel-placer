@@ -1,7 +1,8 @@
 import React from "react";
 
 import { ReactZoomPanPinchContentRef } from "react-zoom-pan-pinch";
-import { Button } from "./core/Button";
+import { MdOutlineZoomIn, MdOutlineZoomOut } from "react-icons/md";
+import { Button } from "./ui/button";
 
 export const CanvasControls: React.FC<ReactZoomPanPinchContentRef> = ({
   zoomIn,
@@ -17,11 +18,11 @@ export const CanvasControls: React.FC<ReactZoomPanPinchContentRef> = ({
       maxWidth: "calc(100% - 20px)",
     }}
   >
-    <Button type="button" onClick={() => zoomIn()}>
-      Zoom In +
+    <Button size="icon" type="button" onClick={() => zoomIn()}>
+      <MdOutlineZoomIn />
     </Button>
-    <Button type="button" onClick={() => zoomOut()}>
-      Zoom Out -
+    <Button size="icon" type="button" onClick={() => zoomOut()}>
+      <MdOutlineZoomOut />
     </Button>
     <Button type="button" onClick={() => resetTransform()}>
       Reset
