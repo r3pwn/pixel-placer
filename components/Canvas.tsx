@@ -101,7 +101,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   }, [activePixel]);
 
   return (
-    <TransformWrapper initialScale={4}>
+    <TransformWrapper initialScale={2} minScale={0.5}>
       {(utils) => (
         <div>
           <CanvasControls {...utils} />
@@ -113,7 +113,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
           >
             {activePixel && (
               <div
-                className={`canvas-pixel absolute outline outline-2 shadow-xl outline-offset-[-1px]`}
+                className="canvas-pixel absolute outline outline-2 outline-offset-[-1px] shadow-xl"
                 style={{
                   backgroundColor: "transparent",
                   width: CANVAS_PX_SCALE,
