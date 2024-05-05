@@ -53,13 +53,10 @@ export default function ColorPickerDialog({
                       role="radio"
                       aria-checked={pastColor === selectedColor}
                       style={{
-                        width: 20,
-                        height: 20,
                         backgroundColor: pastColor,
                         outline: pastColor === selectedColor ? "auto" : "none",
-                        outlineOffset: "2px",
-                        borderRadius: "100%",
                       }}
+                      className="h-8 w-8 rounded-full outline-offset-2"
                       onClick={() => setSelectedColor(pastColor)}
                     ></button>
                   );
