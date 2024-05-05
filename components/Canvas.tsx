@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { PIXELS_PER_ROW, CANVAS_PX_SCALE } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
@@ -16,6 +16,7 @@ import { rgbToHex } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { MdOutlineEdit } from "react-icons/md";
 import Link from "next/link";
+import Color from "color";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -84,24 +85,24 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
       });
     };
 
-    const hoverHandler = (e: MouseEvent) => {
-      const hoverX = Math.floor(e.offsetX / CANVAS_PX_SCALE);
-      const hoverY = Math.floor(e.offsetY / CANVAS_PX_SCALE);
-
-      if (activePixel?.x === hoverX && activePixel?.y === hoverY) {
-        return;
-      }
-      // setActivePixel({ x: hoverX, y: hoverY, color: "#ffffff" });
-    };
-
     canvas?.addEventListener("click", clickHandler);
-    canvas?.addEventListener("mousemove", hoverHandler);
 
     return () => {
       canvas?.removeEventListener("click", clickHandler);
-      canvas?.removeEventListener("mousemove", hoverHandler);
     };
   }, [canvasContext, canvasRef, currentColor, activePixel]);
+
+  const activeOutline = useMemo(() => {
+    const colorObject = Color(activePixel?.color);
+    if (colorObject.black() >= 90) {
+      return Color.rgb(150, 150, 150);
+    } else if (colorObject.black() >= 50) {
+      return colorObject.lighten(1);
+    }
+    return colorObject.isDark()
+      ? colorObject.lighten(0.25)
+      : colorObject.darken(0.25);
+  }, [activePixel]);
 
   return (
     <TransformWrapper initialScale={4}>
@@ -132,13 +133,12 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
           >
             {activePixel && (
               <div
-                className={`canvas-pixel absolute outline outline-1 shadow-lg outline-offset-[-1px]`}
+                className={`canvas-pixel absolute outline outline-2 shadow-xl outline-offset-[-1px]`}
                 style={{
                   backgroundColor: "transparent",
                   width: CANVAS_PX_SCALE,
                   height: CANVAS_PX_SCALE,
-                  // outlineColor: darkenedColor.toString(),
-                  outlineColor: "red",
+                  outlineColor: activeOutline.toString(),
                   top: activePixel.y * CANVAS_PX_SCALE,
                   left: activePixel.x * CANVAS_PX_SCALE,
                 }}
