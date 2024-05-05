@@ -30,7 +30,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     undefined as CanvasPixel | undefined
   );
   const { currentColor, addPastColor } = useColorStore();
-  const { canvasRef, canvasContext, mirrorRef, drawToCanvas } = useCanvas(
+  const { canvasRef, canvasContext, drawToCanvas } = useCanvas(
     CANVAS_WIDTH,
     CANVAS_HEIGHT,
     CANVAS_PX_SCALE
