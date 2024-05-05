@@ -1,5 +1,5 @@
 import { useColorStore } from "@/stores/color";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { Button } from "./ui/button";
 import {
@@ -25,6 +25,10 @@ export default function ColorPickerDialog({
 }: Props) {
   const { pastColors } = useColorStore();
   const [selectedColor, setSelectedColor] = useState(initialColor);
+
+  useEffect(() => {
+    setSelectedColor(initialColor);
+  }, [initialColor]);
 
   return (
     <Dialog>
