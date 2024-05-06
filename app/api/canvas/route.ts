@@ -7,20 +7,32 @@ import e from "@/dbschema/edgeql-js";
 const PIXEL_COORD_MIN = 0;
 const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
 
-export async function GET() {
-  const pixels = await e
-    .select(e.CanvasPixel, () => ({
-      x: true,
-      y: true,
-      color: true,
-    }))
-    .run(client);
+export async function GET(req: NextRequest) {
+  const {
+    nextUrl: { searchParams },
+  } = req;
 
-  if (!pixels) {
-    return NextResponse.json(
-      { message: "No pixels available" },
-      { status: 404 }
-    );
+  const from = searchParams.get("from");
+  let pixels = [] as CanvasPixel[];
+
+  if (from) {
+    const fromDate = new Date(from || "");
+    pixels = await e
+      .select(e.CanvasPixel, (pixel) => ({
+        x: true,
+        y: true,
+        color: true,
+        filter: e.op(pixel.updated_at, ">", fromDate),
+      }))
+      .run(client);
+  } else {
+    pixels = await e
+      .select(e.CanvasPixel, () => ({
+        x: true,
+        y: true,
+        color: true,
+      }))
+      .run(client);
   }
 
   return NextResponse.json(pixels, { status: 200 });
@@ -68,12 +80,14 @@ export async function POST(req: NextRequest) {
       x: Number(reqJson.x),
       y: Number(reqJson.y),
       color: reqJson.color,
+      updated_at: new Date(),
     })
     .unlessConflict((pixel) => ({
       on: e.tuple([pixel.x, pixel.y]),
       else: e.update(pixel, () => ({
         set: {
           color: reqJson.color,
+          updated_at: new Date(),
         },
       })),
     }))

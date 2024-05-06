@@ -27,7 +27,9 @@ module default {
     required color: Color {
       default := "#ffffff"
     }
+    required updated_at: datetime;
 
     constraint exclusive on ((.x, .y));
+    index on (.updated_at);
   }
 }
