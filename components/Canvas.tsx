@@ -48,18 +48,24 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     if (!canvasContext) {
       return;
     }
+
     getCanvasPixels().then(drawToCanvas);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext]);
 
   useEffect(() => {
+    if (!canvasContext) {
+      return;
+    }
+
     const interval = setInterval(() => {
       getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
       setCanvasLastUpdated(new Date().toISOString());
     }, 10_000);
 
-    return () => clearInterval(interval); //This is important
-  }, [canvasLastUpdated]);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canvasLastUpdated, canvasContext]);
 
   useEffect(() => {
     if (!canvasContext) {
