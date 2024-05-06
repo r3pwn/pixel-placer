@@ -2,7 +2,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { PIXELS_PER_ROW, CANVAS_PX_SCALE } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
-import { getCanvasPixels, putCanvasPixel } from "@/providers/canvas";
+import {
+  getCanvasDelta,
+  getCanvasPixels,
+  putCanvasPixel,
+} from "@/providers/canvas";
 import { useColorStore } from "@/stores/color";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { CanvasControls } from "./CanvasControls";
@@ -30,6 +34,9 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   const [activePixel, setActivePixel] = useState(
     undefined as CanvasPixel | undefined
   );
+  const [canvasLastUpdated, setCanvasLastUpdated] = useState(
+    new Date().toISOString()
+  );
   const { addPastColor } = useColorStore();
   const { canvasRef, canvasContext, drawToCanvas } = useCanvas(
     CANVAS_WIDTH,
@@ -42,7 +49,17 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
       return;
     }
     getCanvasPixels().then(drawToCanvas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
+      setCanvasLastUpdated(new Date().toISOString());
+    }, 10_000);
+
+    return () => clearInterval(interval); //This is important
+  }, [canvasLastUpdated]);
 
   useEffect(() => {
     if (!canvasContext) {

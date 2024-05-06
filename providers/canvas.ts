@@ -9,6 +9,11 @@ export const getCanvasPixels = async () => {
   return (await result.json()) as CanvasPixel[];
 };
 
+export const getCanvasDelta = async (from: string) => {
+  const result = await fetch(`/api/canvas?from=${from}`);
+  return (await result.json()) as CanvasPixel[];
+};
+
 export const putCanvasPixel = async (pixel: CanvasPixel) => {
   const result = await fetch("/api/canvas", {
     method: "POST",
