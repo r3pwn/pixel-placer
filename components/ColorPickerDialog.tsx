@@ -11,6 +11,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "./ui/dialog";
+import { useBankStore } from "@/stores/bank";
 
 type Props = {
   initialColor: string;
@@ -25,6 +26,7 @@ export default function ColorPickerDialog({
 }: Props) {
   const { pastColors } = useColorStore();
   const [selectedColor, setSelectedColor] = useState(initialColor);
+  const { currentPixels } = useBankStore();
 
   useEffect(() => {
     setSelectedColor(initialColor);
@@ -66,7 +68,7 @@ export default function ColorPickerDialog({
         </DialogHeader>
         <DialogFooter>
           <DialogClose asChild>
-            <Button type="submit" onClick={() => onSubmit(selectedColor)}>
+            <Button type="submit" onClick={() => onSubmit(selectedColor)} disabled={currentPixels <= 0}>
               Change
             </Button>
           </DialogClose>

@@ -13,6 +13,14 @@ module default {
   type User {
     required name: str;
     required identity: ext::auth::Identity;
+    required bank: PixelBank {
+      constraint exclusive;
+    };
+
+    access policy logged_in_user_has_access 
+      allow all using (
+        .identity ?= global ext::auth::ClientTokenIdentity
+      )
   }
 
   type CanvasPixel {
@@ -31,5 +39,31 @@ module default {
 
     constraint exclusive on ((.x, .y));
     index on (.updated_at);
+  }
+
+  type PixelBank {
+    required currentPixels: int16 {
+      constraint min_value(0);
+      default := 0;
+    }
+
+    required last_awarded_at: datetime;
+  }
+
+  type PixelPackages {
+    required name: str {
+      constraint max_len_value(50)
+    }
+    required description: str {
+      constraint max_len_value(200)
+    }
+    required price: int16 {
+      constraint min_value(0)
+    }
+    required instantPixels: int16 {
+      constraint min_value(0)
+    }
+
+    required updated_at: datetime;
   }
 }

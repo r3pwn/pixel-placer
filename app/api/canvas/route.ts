@@ -75,7 +75,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Bad request" }, { status: 400 });
   }
 
-  let result = await e
+  // Validate that the user has pixel tokens
+  const authenticatedClient = session.client;
+  const userBank = await e.select(e.User.bank, () => ({
+    id: true,
+    currentPixels: true
+  })).run(authenticatedClient)
+
+  const { currentPixels, id } = userBank[0]
+
+  if (currentPixels === 0) {
+    return NextResponse.json({ message: "Not enough available pixels!"}, {status: 401})
+  }
+
+  let canvasUpdateResult = await e
     .insert(e.CanvasPixel, {
       x: Number(reqJson.x),
       y: Number(reqJson.y),
@@ -92,6 +105,23 @@ export async function POST(req: NextRequest) {
       })),
     }))
     .run(client);
+  
+  // Wrap update call to return the updated currentPixels value with a single DB Query
+  const update = e.update(e.PixelBank, (bank) => ({
+    filter_single: { id },
+    set: {
+      currentPixels: e.op(bank.currentPixels, "-", 1)
+    }
+  }))
+  const updatedBank = await e.select(update, () => ({
+    currentPixels: true
+  })).run(authenticatedClient);
+
+
+  const result = {
+    id: canvasUpdateResult.id,
+    currentPixels: updatedBank && updatedBank.currentPixels
+  }
 
   return NextResponse.json(result, {
     status: 200,

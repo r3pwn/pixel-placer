@@ -15,9 +15,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { rgbToHex } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { MdOutlineEdit } from "react-icons/md";
+import { GiToken } from "react-icons/gi";
 import Link from "next/link";
 import Color from "color";
 import ColorPickerDialog from "./ColorPickerDialog";
+import { getPixelBank, pixelBankHeartbeat } from "@/providers/pixelBank";
+import { useBankStore } from "@/stores/bank";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -44,12 +47,15 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     CANVAS_PX_SCALE
   );
 
+  const { setCurrentPixels, currentPixels } = useBankStore();
+
   useEffect(() => {
     if (!canvasContext) {
       return;
     }
 
     getCanvasPixels().then(drawToCanvas);
+    getPixelBank().then(bank => setCurrentPixels(bank.currentPixels))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext]);
 
@@ -60,6 +66,12 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     const interval = setInterval(() => {
       getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
+      pixelBankHeartbeat().then(pixels => {
+        if (!pixels || !pixels.currentPixels) {
+          return;
+        }
+        setCurrentPixels(pixels.currentPixels);
+      })
       setCanvasLastUpdated(new Date().toISOString());
     }, 10_000);
 
@@ -107,6 +119,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     drawToCanvas([pixel]);
     addPastColor(pixel.color);
     putCanvasPixel(pixel);
+    setCurrentPixels(currentPixels - 1);
     setActivePixel(pixel);
   };
 
@@ -162,6 +175,11 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
               }}
             >
               <CardHeader>
+                {isLoggedIn && (
+                  <div className="flex items-center px-2 whitespace-nowrap bg-primary text-primary-foreground gap-2 text-md rounded-full" aria-label="Available tokens">
+                    <GiToken /> <span>{ currentPixels }</span>
+                  </div>
+                )}
                 <CardTitle>
                   ({activePixel.x}, {activePixel.y})
                 </CardTitle>
