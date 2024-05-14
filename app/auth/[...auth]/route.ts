@@ -13,6 +13,10 @@ export const { GET, POST } = auth.createAuthRouteHandlers({
               filter_single: { id: tokenData.identity_id },
             }))
           ),
+          bank: e.insert(e.PixelBank, {
+            currentPixels: 1,
+            last_awarded_at: new Date(),
+          }),
         })
         .run(client);
     }
