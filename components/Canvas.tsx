@@ -21,6 +21,7 @@ import Color from "color";
 import ColorPickerDialog from "./ColorPickerDialog";
 import { getPixelBank, pixelBankHeartbeat } from "@/providers/pixelBank";
 import { useBankStore } from "@/stores/bank";
+import { Badge } from "./ui/badge";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -55,7 +56,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     }
 
     getCanvasPixels().then(drawToCanvas);
-    getPixelBank().then(bank => setCurrentPixels(bank.currentPixels))
+    getPixelBank().then((bank) => setCurrentPixels(bank.currentPixels));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext]);
 
@@ -66,12 +67,12 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     const interval = setInterval(() => {
       getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
-      pixelBankHeartbeat().then(pixels => {
+      pixelBankHeartbeat().then((pixels) => {
         if (!pixels || !pixels.currentPixels) {
           return;
         }
         setCurrentPixels(pixels.currentPixels);
-      })
+      });
       setCanvasLastUpdated(new Date().toISOString());
     }, 10_000);
 
@@ -176,9 +177,9 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
             >
               <CardHeader>
                 {isLoggedIn && (
-                  <div className="flex items-center px-2 whitespace-nowrap bg-primary text-primary-foreground gap-2 text-md rounded-full" aria-label="Available tokens">
-                    <GiToken /> <span>{ currentPixels }</span>
-                  </div>
+                  <Badge className="mb-2 mr-auto" icon={<GiToken />}>
+                    {currentPixels}
+                  </Badge>
                 )}
                 <CardTitle>
                   ({activePixel.x}, {activePixel.y})
