@@ -51,14 +51,16 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   const { setCurrentPixels, currentPixels } = useBankStore();
 
   useEffect(() => {
-    if (!canvasContext || !isLoggedIn) {
+    if (!canvasContext) {
       return;
     }
 
     getCanvasPixels().then(drawToCanvas);
-    getPixelBank().then((bank) => setCurrentPixels(bank.currentPixels));
+    if (isLoggedIn) {
+      getPixelBank().then((bank) => setCurrentPixels(bank.currentPixels));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasContext]);
+  }, [canvasContext, isLoggedIn]);
 
   useEffect(() => {
     if (!canvasContext) {
@@ -67,18 +69,20 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     const interval = setInterval(() => {
       getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
-      pixelBankHeartbeat().then((pixels) => {
-        if (!pixels || !pixels.currentPixels) {
-          return;
-        }
-        setCurrentPixels(pixels.currentPixels);
-      });
+      if (isLoggedIn) {
+        pixelBankHeartbeat().then((pixels) => {
+          if (!pixels || !pixels.currentPixels) {
+            return;
+          }
+          setCurrentPixels(pixels.currentPixels);
+        });
+      }
       setCanvasLastUpdated(new Date().toISOString());
     }, 10_000);
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasLastUpdated, canvasContext]);
+  }, [canvasLastUpdated, canvasContext, isLoggedIn]);
 
   useEffect(() => {
     if (!canvasContext) {
