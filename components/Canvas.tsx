@@ -51,7 +51,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   const { setCurrentPixels, currentPixels } = useBankStore();
 
   useEffect(() => {
-    if (!canvasContext) {
+    if (!canvasContext || !isLoggedIn) {
       return;
     }
 
