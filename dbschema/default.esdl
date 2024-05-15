@@ -17,6 +17,8 @@ module default {
       constraint exclusive;
     };
 
+    access policy allow_create
+      allow insert;
     access policy logged_in_user_has_access 
       allow all using (
         .identity ?= global ext::auth::ClientTokenIdentity
