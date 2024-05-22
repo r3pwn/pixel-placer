@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Pixel Auction",
-  description: "Get your pixels now!",
+  title: "Pixel Place",
+  description: "Place your pixels wherever you want!",
 };
 
 export default function RootLayout({
