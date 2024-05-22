@@ -51,21 +51,4 @@ module default {
 
     required last_awarded_at: datetime;
   }
-
-  type PixelPackages {
-    required name: str {
-      constraint max_len_value(50)
-    }
-    required description: str {
-      constraint max_len_value(200)
-    }
-    required price: int16 {
-      constraint min_value(0)
-    }
-    required instantPixels: int16 {
-      constraint min_value(0)
-    }
-
-    required updated_at: datetime;
-  }
 }
