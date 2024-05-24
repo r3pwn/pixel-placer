@@ -2,13 +2,13 @@ import React from "react";
 
 import { ReactZoomPanPinchContentRef } from "react-zoom-pan-pinch";
 import { MdOutlineZoomIn, MdOutlineZoomOut } from "react-icons/md";
+import { GrPowerReset } from "react-icons/gr";
 import { Button } from "./ui/button";
 
 export const CanvasControls: React.FC<ReactZoomPanPinchContentRef> = ({
   zoomIn,
   zoomOut,
   resetTransform,
-  centerView,
 }: ReactZoomPanPinchContentRef) => (
   <div
     className="absolute flex gap-1"
@@ -24,11 +24,8 @@ export const CanvasControls: React.FC<ReactZoomPanPinchContentRef> = ({
     <Button size="icon" type="button" onClick={() => zoomOut()}>
       <MdOutlineZoomOut />
     </Button>
-    <Button type="button" onClick={() => resetTransform()}>
-      Reset
-    </Button>
-    <Button type="button" onClick={() => centerView()}>
-      Center
+    <Button size="icon" type="button" onClick={() => resetTransform()}>
+      <GrPowerReset />
     </Button>
   </div>
 );
