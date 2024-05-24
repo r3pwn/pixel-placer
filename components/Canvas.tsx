@@ -18,7 +18,7 @@ import { FaHourglassEnd, FaPencilAlt, FaSquare } from "react-icons/fa";
 import Link from "next/link";
 import Color from "color";
 import ColorPickerDialog from "./ColorPickerDialog";
-import { getPixelBank, pixelBankHeartbeat } from "@/providers/pixelBank";
+import { getBank } from "@/providers/pixelBank";
 import { useBankStore } from "@/stores/bank";
 import { Badge } from "./ui/badge";
 import { useTimer } from "@/hooks/useTimer";
@@ -47,7 +47,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     CANVAS_HEIGHT,
     CANVAS_PX_SCALE
   );
-  const { timer, setTimer } = useTimer();
+  const { timer, startTimer } = useTimer();
 
   const {
     currentPixels,
@@ -61,32 +61,13 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     getCanvasPixels().then(drawToCanvas);
     if (isLoggedIn) {
-      getPixelBank().then((bank) => {
+      getBank().then((bank) => {
         setCurrentPixels(bank.currentPixels);
-        setTimer(bank.nextPixelIn);
+        startTimer(bank.nextPixelIn);
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext, isLoggedIn]);
-
-  useEffect(() => {
-    if (!isLoggedIn) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      pixelBankHeartbeat().then((pixels) => {
-        if (!pixels || !pixels.currentPixels) {
-          return;
-        }
-        setCurrentPixels(pixels.currentPixels);
-        setTimer(pixels.nextPixelIn);
-      });
-      setCanvasLastUpdated(new Date().toISOString());
-    }, 10_000);
-
-    return () => clearInterval(interval);
-  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!canvasContext) {
@@ -100,7 +81,19 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canvasLastUpdated, canvasContext, isLoggedIn]);
+  }, [canvasLastUpdated, canvasContext]);
+
+  useEffect(() => {
+    if (timer !== 0) {
+      return;
+    }
+
+    // once the pixel timer hits 0, make the bank call again, and the cycle repeats
+    getBank().then((bank) => {
+      setCurrentPixels(bank.currentPixels);
+      startTimer(bank.nextPixelIn);
+    });
+  }, [timer]);
 
   useEffect(() => {
     if (!canvasContext) {
@@ -142,7 +135,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     drawToCanvas([pixel]);
     addPastColor(pixel.color);
     putCanvasPixel(pixel).then(res => {
-      setTimer(res.nextPixelIn)
+      startTimer(res.nextPixelIn)
     });
     setCurrentPixels(currentPixels - 1);
     setActivePixel(pixel);

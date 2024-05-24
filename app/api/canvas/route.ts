@@ -9,6 +9,7 @@ const PIXEL_COORD_MIN = 0;
 const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
 
 const PIXEL_AWARD_RATE = (process.env.PIXEL_AWARD_RATE && parseInt(process.env.PIXEL_AWARD_RATE)) || 0;
+const PIXEL_BANK_MAX = (process.env.PIXEL_BANK_MAX && parseInt(process.env.PIXEL_BANK_MAX)) || 0;
 
 export async function GET(req: NextRequest) {
   const {
@@ -110,12 +111,12 @@ export async function POST(req: NextRequest) {
     }))
     .run(client);
   
-  // Wrap update call to return the updated currentPixels value with a single DB Query
   let carryoverSeconds = secondsDiff(new Date, last_awarded_at);
-  if (carryoverSeconds >= PIXEL_AWARD_RATE) {
+  if (carryoverSeconds >= PIXEL_AWARD_RATE || currentPixels === PIXEL_BANK_MAX) {
     carryoverSeconds = 0;
   }
-
+    
+  // Wrap update call to return the updated currentPixels value with a single DB Query
   const update = e.update(e.PixelBank, (bank) => ({
     filter_single: { id },
     set: {

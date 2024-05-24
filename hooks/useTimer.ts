@@ -16,7 +16,9 @@ export const useTimer = () => {
   }, [timer]);
 
   return {
+    /** the number of seconds remaining on the timer. A value of `-1` indicates no running timers */
     timer,
-    setTimer,
+    /** starts a timer for `n` seconds. Overwrites any existing timers */
+    startTimer: setTimer,
   };
 };
