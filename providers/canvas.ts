@@ -2,6 +2,7 @@ import { CanvasPixel } from "@/types/CanvasPixel";
 
 type PixelUpdateResponse = {
   id: string;
+  nextPixelIn: number;
 };
 
 export const getCanvasPixels = async () => {

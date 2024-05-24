@@ -1,3 +1,4 @@
 export type PixelBank = {
-    currentPixels: number
+    currentPixels: number,
+    nextPixelIn: number
 }

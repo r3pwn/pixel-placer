@@ -14,14 +14,14 @@ import { useCanvas } from "@/hooks/useCanvas";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { rgbToHex } from "@/lib/utils";
 import { Button } from "./ui/button";
-import { MdOutlineEdit } from "react-icons/md";
-import { GiToken } from "react-icons/gi";
+import { FaHourglassEnd, FaPencilAlt, FaSquare } from "react-icons/fa";
 import Link from "next/link";
 import Color from "color";
 import ColorPickerDialog from "./ColorPickerDialog";
 import { getPixelBank, pixelBankHeartbeat } from "@/providers/pixelBank";
 import { useBankStore } from "@/stores/bank";
 import { Badge } from "./ui/badge";
+import { useTimer } from "@/hooks/useTimer";
 
 // assuming a square canvas
 const NUM_ROWS = PIXELS_PER_ROW;
@@ -47,8 +47,12 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     CANVAS_HEIGHT,
     CANVAS_PX_SCALE
   );
+  const { timer, setTimer } = useTimer();
 
-  const { setCurrentPixels, currentPixels } = useBankStore();
+  const {
+    currentPixels,
+    setCurrentPixels,
+  } = useBankStore();
 
   useEffect(() => {
     if (!canvasContext) {
@@ -57,10 +61,32 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     getCanvasPixels().then(drawToCanvas);
     if (isLoggedIn) {
-      getPixelBank().then((bank) => setCurrentPixels(bank.currentPixels));
+      getPixelBank().then((bank) => {
+        setCurrentPixels(bank.currentPixels);
+        setTimer(bank.nextPixelIn);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasContext, isLoggedIn]);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      pixelBankHeartbeat().then((pixels) => {
+        if (!pixels || !pixels.currentPixels) {
+          return;
+        }
+        setCurrentPixels(pixels.currentPixels);
+        setTimer(pixels.nextPixelIn);
+      });
+      setCanvasLastUpdated(new Date().toISOString());
+    }, 10_000);
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (!canvasContext) {
@@ -69,14 +95,6 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
 
     const interval = setInterval(() => {
       getCanvasDelta(canvasLastUpdated).then(drawToCanvas);
-      if (isLoggedIn) {
-        pixelBankHeartbeat().then((pixels) => {
-          if (!pixels || !pixels.currentPixels) {
-            return;
-          }
-          setCurrentPixels(pixels.currentPixels);
-        });
-      }
       setCanvasLastUpdated(new Date().toISOString());
     }, 10_000);
 
@@ -123,7 +141,9 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
   const eagerDraw = (pixel: CanvasPixel) => {
     drawToCanvas([pixel]);
     addPastColor(pixel.color);
-    putCanvasPixel(pixel);
+    putCanvasPixel(pixel).then(res => {
+      setTimer(res.nextPixelIn)
+    });
     setCurrentPixels(currentPixels - 1);
     setActivePixel(pixel);
   };
@@ -181,9 +201,14 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
             >
               <CardHeader>
                 {isLoggedIn && (
-                  <Badge className="mb-2 mr-auto" icon={<GiToken />}>
-                    {currentPixels}
-                  </Badge>
+                  <div className="mb-2">
+                    <Badge className="mr-2" icon={<FaSquare />}>
+                      {currentPixels}
+                    </Badge>
+                    {timer !== -1 && <Badge variant="secondary" icon={<FaHourglassEnd />}>
+                      {timer}s
+                    </Badge>}
+                  </div>
                 )}
                 <CardTitle>
                   ({activePixel.x}, {activePixel.y})
@@ -211,7 +236,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
                     initialColor={activePixel.color}
                     trigger={
                       <Button size="icon" type="button">
-                        <MdOutlineEdit />
+                        <FaPencilAlt size={20}/>
                       </Button>
                     }
                     onSubmit={(color) =>

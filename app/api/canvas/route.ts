@@ -3,9 +3,12 @@ import { auth, client } from "@/providers/edgedb";
 import { PIXELS_PER_ROW } from "@/constants";
 import { CanvasPixel } from "@/types/CanvasPixel";
 import e from "@/dbschema/edgeql-js";
+import { secondsDiff } from "@/lib/utils";
 
 const PIXEL_COORD_MIN = 0;
 const PIXEL_COORD_MAX = PIXELS_PER_ROW - 1;
+
+const PIXEL_AWARD_RATE = (process.env.PIXEL_AWARD_RATE && parseInt(process.env.PIXEL_AWARD_RATE)) || 0;
 
 export async function GET(req: NextRequest) {
   const {
@@ -79,10 +82,11 @@ export async function POST(req: NextRequest) {
   const authenticatedClient = session.client;
   const userBank = await e.select(e.User.bank, () => ({
     id: true,
-    currentPixels: true
+    currentPixels: true,
+    last_awarded_at: true
   })).run(authenticatedClient)
 
-  const { currentPixels, id } = userBank[0]
+  const { currentPixels, id, last_awarded_at } = userBank[0]
 
   if (currentPixels === 0) {
     return NextResponse.json({ message: "Not enough available pixels!"}, {status: 401})
@@ -107,10 +111,16 @@ export async function POST(req: NextRequest) {
     .run(client);
   
   // Wrap update call to return the updated currentPixels value with a single DB Query
+  let carryoverSeconds = secondsDiff(new Date, last_awarded_at);
+  if (carryoverSeconds >= PIXEL_AWARD_RATE) {
+    carryoverSeconds = 0;
+  }
+
   const update = e.update(e.PixelBank, (bank) => ({
     filter_single: { id },
     set: {
-      currentPixels: e.op(bank.currentPixels, "-", 1)
+      currentPixels: e.op(bank.currentPixels, "-", 1),
+      last_awarded_at: new Date(new Date().getTime() - (carryoverSeconds * 1000))
     }
   }))
   const updatedBank = await e.select(update, () => ({
@@ -120,7 +130,8 @@ export async function POST(req: NextRequest) {
 
   const result = {
     id: canvasUpdateResult.id,
-    currentPixels: updatedBank && updatedBank.currentPixels
+    currentPixels: updatedBank && updatedBank.currentPixels,
+    nextPixelIn: (PIXEL_AWARD_RATE - Math.min(carryoverSeconds, PIXEL_AWARD_RATE)) || PIXEL_AWARD_RATE
   }
 
   return NextResponse.json(result, {
