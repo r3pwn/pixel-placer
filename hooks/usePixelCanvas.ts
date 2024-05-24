@@ -1,7 +1,7 @@
 import { CanvasPixel } from "@/types/CanvasPixel";
 import { useEffect, useRef, useState } from "react";
 
-export const useCanvas = (width: number, height: number, scale = 1) => {
+export const usePixelCanvas = (width: number, height: number, scale = 1) => {
   const [canvasContext, setCanvasContext] = useState(
     null as CanvasRenderingContext2D | null
   );

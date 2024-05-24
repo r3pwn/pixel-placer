@@ -10,7 +10,7 @@ import {
 import { useColorStore } from "@/stores/color";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { CanvasControls } from "./CanvasControls";
-import { useCanvas } from "@/hooks/useCanvas";
+import { usePixelCanvas } from "@/hooks/usePixelCanvas";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { rgbToHex } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -42,7 +42,7 @@ export default function Canvas({ isLoggedIn, authUrl }: Props) {
     new Date().toISOString()
   );
   const { addPastColor } = useColorStore();
-  const { canvasRef, canvasContext, drawToCanvas } = useCanvas(
+  const { canvasRef, canvasContext, drawToCanvas } = usePixelCanvas(
     CANVAS_WIDTH,
     CANVAS_HEIGHT,
     CANVAS_PX_SCALE
